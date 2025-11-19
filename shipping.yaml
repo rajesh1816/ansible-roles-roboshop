@@ -1,0 +1,91 @@
+#!/bin/bash
+
+- name: configuring shipping component
+  hosts: shipping
+  become: yes
+  tasks:
+  - name: install maven and mysql
+    ansible.builtin.dnf:
+      name: "{{ item }}"
+      state: present
+    loop:
+    - maven
+    - mysql
+
+  - name: install pymysql and cryptography
+    ansible.builtin.pip:
+      name: "{{ item }}"
+      state: present
+    loop:
+    - cryptography
+    - PyMySQL
+
+  - name: create /app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
+
+  - name: creating system user
+    ansible.builtin.user:
+      name: roboshop 
+      state: present
+      system: yes # This parameter makes it a system user
+      shell: /sbin/nologin # Typically, system users do not have login shells
+      home: /app
+
+  - name: download code to tmp directory
+    ansible.builtin.get_url:
+      url: https://roboshop-backend-src.s3.us-east-1.amazonaws.com/shipping-v3.zip
+      dest: /tmp/shipping.zip
+  
+  - name: unzipping the file into app directory
+    ansible.builtin.unarchive:
+      src: /tmp/shipping.zip
+      dest: /app
+      remote_src: yes
+    
+  - name: install maven dependencies
+    ansible.builtin.command: mvn clean package
+    args:
+      chdir: /app
+
+  - name: rename jar file
+    ansible.builtin.command: mv target/shipping-1.0.jar shipping.jar 
+    args:
+      chdir: /app 
+
+  - name: copying shipping service file systemctl
+    ansible.builtin.copy:
+      src: shipping.service
+      dest: /etc/systemd/system/shipping.service
+
+  - name: deamon - reload
+    ansible.builtin.systemd:
+      daemon_reload: true
+
+  - name: Enable and start the service
+    ansible.builtin.service:
+      name: shipping
+      state: started
+      enabled: yes
+
+  - name: import mysql data 
+    community.mysql.mysql_db:
+      name: all
+      login_user: root
+      login_password: RoboShop@1
+      login_host: mysql.rajeshit.space
+      state: import
+      target: "{{ item }}"
+    loop:
+    - /app/db/schema.sql
+    - /app/db/app-user.sql
+    - /app/db/master-data.sql
+
+  - name: restart shipping
+    tags:
+    - import
+    ansible.builtin.service:
+      name: shipping  
+      state: restarted 
+  

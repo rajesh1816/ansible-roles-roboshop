@@ -1,0 +1,86 @@
+#!/bin/bash
+
+- name: configuring catalogue service
+  hosts: catalogue
+  become: yes
+  tasks:
+  - name: disable the default nodejs
+    ansible.builtin.command: dnf module disable nodejs -y
+  
+  - name: enable the nodejs 20 version
+    ansible.builtin.command: dnf module enable nodejs:20 -y
+  
+  - name: installing the nodejs 20 version
+    ansible.builtin.dnf:
+      name: nodejs
+      state: present
+  
+  - name: create /app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
+
+  - name: creating system user
+    ansible.builtin.user:
+      name: roboshop 
+      state: present
+      system: yes # This parameter makes it a system user
+      shell: /sbin/nologin # Typically, system users do not have login shells
+      home: /app
+
+  - name: download code to tmp directory
+    ansible.builtin.get_url:
+      url: https://roboshop-backend-src.s3.us-east-1.amazonaws.com/catalogue-v3.zip
+      dest: /tmp/catalogue.zip
+
+  - name: changing the app directory
+    ansible.builtin.command: cd /app
+
+  - name: unzipping the file into app directory
+    ansible.builtin.unarchive:
+      src: /tmp/catalogue.zip
+      dest: /app
+      remote_src: yes
+
+  - name: installing dependencies
+    community.general.npm:
+      path: /app
+      state: present
+
+  - name: copying catalogue service file systemctl
+    ansible.builtin.copy:
+      src: catalogue.service
+      dest: /etc/systemd/system/catalogue.service
+
+  - name: deamon - reload
+    ansible.builtin.systemd:
+      daemon_reload: yes
+
+  - name: Enable and start the service
+    ansible.builtin.service:
+      name: catalogue
+      state: started
+      enabled: yes
+  
+  - name: copying mongo repo for clinet installation
+    ansible.builtin.copy:
+      src: mongo.repo
+      dest: /etc/yum.repos.d/mongo.repo
+
+  - name: install mongodb client
+    ansible.builtin.dnf:
+      name: mongodb-mongosh
+      state: present
+  
+  - name: check products loaded or not
+    ansible.builtin.command: mongosh --host mongodb.rajeshit.space --eval 'db.getMongo().getDBNames().indexOf("catalogue")'
+    register: catalogue_output
+
+  - name: print catalogue output
+    ansible.builtin.debug:
+      msg: "{{ catalogue_output }}"
+
+  - name: load products
+    ansible.builtin.shell: mongosh --host mongodb.rajeshit.space < /app/db/master-data.js
+    when: catalogue_output.stdout | int < 0
+  
