@@ -1,0 +1,13 @@
+- name: "install {{ component }} server"
+  ansible.builtin.dnf:
+    name: "{{ component }}"
+    state: present
+
+- name: enable and start the service
+  ansible.builtin.service:
+    name: mysqld
+    state: started
+    enabled: yes
+  
+- name: setup root password
+  ansible.builtin.command: mysql_secure_installation --set-root-pass RoboShop@1
