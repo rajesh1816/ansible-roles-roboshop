@@ -1,9 +1,9 @@
-- name: installing "{{ component }}" server
+- name: installing mondodb server
   ansible.builtin.copy:
     src: mongo.repo
     dest: /etc/yum.repos.d/mongo.repo
 
-- name: install "{{ component }}" 
+- name: install mongodb 
   ansible.builtin.dnf:
     name: mongodb-org
     state: present
@@ -20,7 +20,7 @@
     regexp: '127.0.0.1'
     replace: '0.0.0.0'
   
-- name: restart the "{{ component }}"
+- name: restart the mongodb
   ansible.builtin.service:
     name: mongod
     state: restarted
