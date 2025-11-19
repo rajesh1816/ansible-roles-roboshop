@@ -1,6 +1,6 @@
 #!/bin/bash
 
-- name: configuring {{ component }}
+- name: "configuring {{ component }}"
   #hosts: "{{ component }}"
   hosts: localhost
   connection: local
