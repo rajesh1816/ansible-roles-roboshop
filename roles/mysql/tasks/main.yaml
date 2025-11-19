@@ -1,6 +1,6 @@
-- name: "install {{ component }} server"
+- name: install mysql server
   ansible.builtin.dnf:
-    name: "{{ component }}"
+    name: mysql-server
     state: present
 
 - name: enable and start the service
