@@ -1,6 +1,6 @@
 #!/bin/bash
 
-- name: configuring mongodb on the server
+- name: configuring {{ component }} 
   hosts: mongodb
   become: yes
   roles:
