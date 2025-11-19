@@ -1,17 +1,17 @@
 - name: app-setup
   include_role:
     name: common
-    task_from: app-setup
+    tasks_from: app-setup
   
 - name: nodejs setup
   include_role: 
     name: common
-    task_from: nodejs-setup
+    tasks_from: nodejs-setup
 
 - name: systemctl setup
   include_role:
     name: common
-    task_from: systemctl-setup
+    tasks_from: systemctl-setup
 
 - name: copying mongo repo for clinet installation
   ansible.builtin.copy:
