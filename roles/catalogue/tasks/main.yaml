@@ -6,12 +6,12 @@
 - name: nodejs setup
   include_role: 
     name: common
-    tasks_from: nodejs-setup
+    tasks_from: nodejs
 
 - name: systemctl setup
   include_role:
     name: common
-    tasks_from: systemctl-setup
+    tasks_from: systemctl
 
 - name: copying mongo repo for clinet installation
   ansible.builtin.copy:
