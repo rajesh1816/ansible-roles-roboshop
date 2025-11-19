@@ -1,4 +1,4 @@
-CATALOGUE_HOST: catalogue.rajeshit.space
+CATALOGUE_HOST: localhost
 USER_HOST: user.rajeshit.space
 CART_HOST: cart.rajeshit.space
 SHIPPING_HOST: shipping.rajeshit.space
