@@ -1,9 +1,7 @@
 #!/bin/bash
 
-- name: configuring {{ component }} 
-  hosts: {{ component }}
+- name: configuring {{ component }}
+  hosts: "{{ component }}"
   become: yes
   roles:
-  - "{{ component }}"
-  
-    
+  - "{{ component }}" 
