@@ -1,0 +1,9 @@
+#!/bin/bash
+
+- name: configuring mongodb on the server
+  hosts: mongodb
+  become: yes
+  roles:
+  - mongodb
+  
+    
