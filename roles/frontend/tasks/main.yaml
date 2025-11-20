@@ -47,7 +47,6 @@
   ansible.builtin.template:
     src: nginx.conf.j2
     dest: /etc/nginx/nginx.conf
-    remote_src: yes
 
 - name: restart nginx
   ansible.builtin.service:
