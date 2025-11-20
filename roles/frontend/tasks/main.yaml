@@ -42,6 +42,8 @@
     state: absent
 
 - name: copy roboshop nginx conf
+  tags:
+  - conf
   ansible.builtin.template:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
